@@ -13,10 +13,16 @@
 > SPDLOG_LEVEL_CRITICAL
 ************************************************************************/
 #include <stdlib.h>
-// #define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE
-#define SPDLOG_TRACE_ON
-#include "spdlog/include/spdlog/spdlog.h"
-using namespace spdlog;
+#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE
+#include "spdlog/spdlog.h"
+
+#define level_trace spdlog::level::trace
+#define level_debug spdlog::level::debug
+#define level_info spdlog::level::info
+#define level_warn spdlog::level::warn
+#define level_error spdlog::level::error
+
+#define LOG_SET_LEVEL(n) do {spdlog::set_level(n);} while (0)
 
 #define LOG_TRACE SPDLOG_TRACE
 #define LOG_DEBUG SPDLOG_DEBUG
