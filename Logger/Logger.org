@@ -2,4 +2,6 @@
   日志输出
 ** spdlog
    https://github.com/gabime/spdlog
-   开源库 spdlog, 感觉挺好用的
+   开源库 spdlog, 感觉挺好用的，注意使用的是 v1.x
+
+   使用 =log_spd.h= 头文件简单封装了下

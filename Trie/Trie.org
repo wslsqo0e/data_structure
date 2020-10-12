@@ -1,1 +1,51 @@
 * Trie 字典树
+** DARTS: Double-ARray Trie System
+   将排序好的序列转化为静态的双数组形式字典树
+
+   核心是 ~build~ 方法
+   ~int build(size_t key_size, key_type **key, value_type *value, size_t *length)~
+
+   key数组的每个元素为  ~key_type *~  即 ~node_type *~   (~typdef node_type key_type~)
+   实际使用时每个元素会被强制转换为  ~node_u_type *~
+
+   给定的key数组要求有序且不可重复  (重复没有意义，查找时会造成混淆)
+
+*** 双数组
+    base数组和check数组， 初始状态
+    base  1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+    check 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+
+    其实还有个used数组
+
+    假设插入某一层节点  code_1, code_2, code_n   (注意当code_1 不可能为0时，赋值code时有个+1 操作)
+    寻找到 begin, 使得 begin + code_1 ... code_n 都是有效位置
+
+    **begin + code_1 ... code_n  的check数组都存储当前层节点的 begin**    这里起到check作用
+    **begin + code_1 ... code_N  的base数组都存储对应子层节点的 begin**    这里起到跳转子节点作用
+
+    然后深度优先插入下一层节点
+
+    当为根节点时    code_1 == 0
+    base中存储 value 的值，将value值转为负数，用以跟之前寻找子层节点的base数组值区分
+
+    base[0] == 1  因为第一层节点的begin必然为1
+
+
+    如果足够严谨，感觉check数组不是太有必要。想想为什么需要check数组
+    肯定需要，当插值一个不存在key时，如果没有check数组，会无限制的查找下去
+
+*** fetch
+
+    字典树的节点的数据类型
+    #+begin_src c++
+      struct node_t {
+        array_u_type_ code;
+        size_t  depth;
+        size_t  left;
+        size_t  right;
+      };
+    #+end_src
+    root 节点的code无意义， depth 为0， left为0  right为 key总个数   right应该是不包含的 [left right)
+
+    https://app.yinxiang.com/fx/b9ce2475-f47e-44d1-970c-dc99b302f890
+*** insert

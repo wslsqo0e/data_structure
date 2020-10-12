@@ -36,3 +36,5 @@ include(CTest)
 enable_testing()
 
 add_subdirectory(Logger)
+include_directories(${LOGGER_INCLUDE_PATH})
+add_subdirectory(Trie)
