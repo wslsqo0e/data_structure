@@ -12,7 +12,7 @@
 > SPDLOG_LEVEL_ERROR
 > SPDLOG_LEVEL_CRITICAL
 ************************************************************************/
-#include <stdlib.h>
+#include "log_base.h"
 #define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE
 #include "spdlog/spdlog.h"
 
