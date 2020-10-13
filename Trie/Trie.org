@@ -1,5 +1,9 @@
 * Trie 字典树
-** DARTS: Double-ARray Trie System
+** DARTS使用
+   StrDarts => TrieDarts
+
+   TrieDarts 封装 DoubleArrayImpl
+** DARTS: Double-ARray Trie System 原理
    将排序好的序列转化为静态的双数组形式字典树
 
    核心是 ~build~ 方法
@@ -49,3 +53,9 @@
 
     https://app.yinxiang.com/fx/b9ce2475-f47e-44d1-970c-dc99b302f890
 *** insert
+    输入是一层节点
+
+    首先为当前层节点找好位置  ~begin~, 设置超check数组的值
+    然后递归插入每个节点的子层节点,  base数组存储子节点的 ~begin~
+
+    会调用 ~fetch~ 方法

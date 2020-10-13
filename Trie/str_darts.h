@@ -1,3 +1,10 @@
+/*************************************************************************
+> File Name:  str_darts.h
+> Author: shenming
+> Created Time: Tue Oct 13 13:35:05 2020
+  TrieDarts的封装，使得对字符串序列操作更方便
+************************************************************************/
+
 /*
   TrieDarts的封装，用于字符串数组的搜索和匹配
   字典树每个节点存储的都是char，不然搜索太宽泛，生成darts也不高效
@@ -12,40 +19,49 @@ class StrDarts : public TrieDarts {
 public:
   StrDarts() : _word_count(0) {};
   ~StrDarts() {
-    _word_map.clear();
+    // _word_map.clear();
+    _word_array.clear();
   }
   int init(std::vector<std::string>& members) {
     if (_is_build) {
-      spdlog::error("already build");
+      LOG_ERROR("already build");
       return -1;
     }
     _word_count = 0;
     for (auto i = members.begin(); i != members.end(); i++) {
       _pair_members.push_back(std::pair<std::string, unsigned int>(*i, _word_count));
-      _word_map[_word_count++] = *i;
+      _word_array.push_back(*i);
+      _word_count++;
+      // _word_map[_word_count++] = *i;
     }
     return 0;
   }
   int init(std::vector<const char*>& members) {
     if (_is_build) {
-      spdlog::error("already build");
+      LOG_ERROR("already build");
       return -1;
     }
     _word_count = 0;
     for (auto i = members.begin(); i != members.end(); i++) {
       _pair_members.push_back(std::pair<std::string, unsigned int>(*i, _word_count));
-      _word_map[_word_count++] = *i;
+      _word_array.push_back(*i);
+      _word_count++;
+      // _word_map[_word_count++] = *i;
     }
     return 0;
   }
   int insert(std::string& member) {
     _pair_members.push_back(std::pair<std::string, unsigned int>(member, _word_count));
-    _word_map[_word_count++] = member;
+    _word_array.push_back(member);
+    _word_count++;
+    // _word_map[_word_count++] = member;
     return 0;
   }
   int insert(const char* member) {
     _pair_members.push_back(std::pair<std::string, unsigned int>(member, _word_count));
-    _word_map[_word_count++] = member;
+    _word_array.push_back(member);
+    _word_count++;
+    // _word_map[_word_count++] = member;
     return 0;
   }
   // build 继承父类方法
@@ -57,7 +73,8 @@ public:
     if (ret == -1) {
       return "";
     } else {
-      return _word_map[ret];
+      // return _word_map[ret];
+      return _word_array[ret];
     }
   }
 
@@ -67,7 +84,8 @@ public:
     if (ret == -1) {
       return "";
     } else {
-      return _word_map[ret];
+      // return _word_map[ret];
+      return _word_array[ret];
     }
   }
 
@@ -91,7 +109,7 @@ public:
     }
   }
 
-  // token 匹配，返回索引，指代token[start:end]在字典树中存在并成词， 不包括返回的end
+  // token 匹配，返回匹配最末的索引，指代tokens[start:end]在字典树中存在并成词， 不包括返回的end
   size_t match_token(std::vector<std::string>& tokens, size_t start = 0) {
     if (start >= tokens.size()) {
       return tokens.size();
@@ -116,6 +134,7 @@ public:
     return tokens.size();
   }
 
+  // 同 match_token 类似，不过能够通过 is_word 判断是否成词
   size_t contain_tokens(std::vector<std::string>& tokens, bool& is_word, size_t start = 0) {
     is_word = false;
     if (start >= tokens.size()) {
@@ -155,12 +174,13 @@ public:
     ofs.write((char*)&_word_count, sizeof(size_t));
 
     char sep = '\0';
-    for (auto i = _word_map.begin(); i != _word_map.end(); i++) {
-      const char* key = i->second.c_str();
-      int wid = i->first;
+    for (auto i = _word_array.begin(); i != _word_array.end(); i++) {
+      // const char* key = i->second.c_str();
+      const char* key = i->c_str();
+      // int wid = i->first;
       ofs.write(key, strlen(key));
       ofs.write(&sep, sizeof(sep));
-      ofs.write((char*)&wid, sizeof(int));
+      // ofs.write((char*)&wid, sizeof(int));
     }
 
     return TrieDarts::save_dart(ofs);
@@ -185,7 +205,8 @@ public:
     ifs.read((char*)&skip, sizeof(int));
 
     ifs.read((char*)&_word_count, sizeof(size_t));
-    _word_map.clear();
+    // _word_map.clear();
+    _word_array.clear();
     for (int i = 0; i < _word_count; i++) {
       int wid = 0;
       char ch = 0;
@@ -199,8 +220,9 @@ public:
         }
         key.push_back(ch);
       }
-      ifs.read((char*)&wid, sizeof(int));
-      _word_map[wid] = key;
+      // ifs.read((char*)&wid, sizeof(int));
+      // _word_map[wid] = key;
+      _word_array.push_back(key);
     }
     return TrieDarts::load_dart(ifs);
   }
@@ -208,7 +230,7 @@ public:
   int save(const char* file_name) {
     std::ofstream ofs(file_name, std::ios::binary);
     if (! ofs.is_open()) {
-      spdlog::warn("invalid filename {}", file_name);
+      LOG_WARN("invalid filename {}", file_name);
       return 1;
     }
 
@@ -218,7 +240,7 @@ public:
   int load(const char* file_name) {
     std::ifstream ifs(file_name, std::ios::binary);
     if (! ifs.is_open()) {
-      spdlog::warn("invalid filename {}", file_name);
+      LOG_WARN("invalid filename {}", file_name);
       return 1;
     }
 
@@ -226,7 +248,8 @@ public:
   }
 
 private:
-  std::unordered_map<int, std::string> _word_map;
+  // std::unordered_map<int, std::string> _word_map;
+  std::vector<std::string> _word_array;
   size_t _word_count;
 };
 

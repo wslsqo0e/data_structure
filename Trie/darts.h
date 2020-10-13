@@ -73,6 +73,7 @@ private:
   size_t        alloc_size_;   // array_ used_ 分配长度
   size_t        size_;
   int           error_;
+  bool          no_delete_;
 
   node_type_    **key_;         //  node_type_ *key     字典数中插入的实际对象
   size_t        key_size_;      //  key 数组长度

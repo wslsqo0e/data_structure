@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "darts.h"
+#include "str_darts.h"
 
 int main(int argc, char* argv[])
 {

@@ -1,6 +1,10 @@
-/*
-  DartsImpl的封装，方便使用
-*/
+/*************************************************************************
+> File Name:  trie_darts.h
+> Author: shenming
+> Created Time: Tue Oct 13 12:39:26 2020
+  DoubleArrayImpl 的封装，方便使用
+************************************************************************/
+
 #pragma once
 #include "darts.h"
 #include "Logger/log_spd.h"
@@ -41,9 +45,7 @@ public:
   }
 
   TrieDarts(std::vector<std::pair<std::string, unsigned int>>& members):_is_build(false) {
-    for (auto i = members.begin(); i != members.end(); i++) {
-      _pair_members.push_back(std::pair<std::string, unsigned int>(i->first, i->second));
-    }
+    _pair_members.assign(members.begin(), members.end());
   }
 
   void insert(std::vector<std::string>& members) {
@@ -82,11 +84,11 @@ public:
 
   int build() {
     if (_is_build) {
-      spdlog::error("TrieDarts already build");
+      LOG_ERROR("TrieDarts already build");
       return -1;
     }
     if (_pair_members.size() == 0) {
-      spdlog::error("you are trying to build a empty trie");
+      LOG_ERROR("you are trying to build a empty trie");
       return -1;
     }
     // sort first
@@ -106,7 +108,7 @@ public:
     delete [] value;
 
     if (error != 0) {
-      spdlog::error("build TrieDarts faled, you may have duplicates keys in data");
+      LOG_ERROR("build TrieDarts faled, you may have duplicates keys in data");
       return error;
     }
 
@@ -226,8 +228,6 @@ public:
 
 protected:
   bool _is_build;
-  // bool _is_first;
-
   DoubleArray _array;
 
   std::vector<std::pair<std::string, unsigned int>> _pair_members;
