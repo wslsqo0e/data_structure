@@ -4,6 +4,9 @@
 > Created Time: Tue Oct 20 18:26:58 2020
 ************************************************************************/
 
+#ifndef __LOG_TRIVAL_H__
+#define __LOG_TRIVAL_H__
+
 #define LOG_TRACE(...)  {                                           \
     fprintf(stderr,"[TRACE] %s: Line %d: \t", __FILE__, __LINE__);  \
     fprintf(stderr, __VA_ARGS__);                                   \
@@ -37,3 +40,5 @@
     fprintf(stderr, "\n");                                          \
     abort();                                                        \
 }
+
+#endif

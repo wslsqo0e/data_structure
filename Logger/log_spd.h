@@ -12,6 +12,9 @@
 > SPDLOG_LEVEL_ERROR
 > SPDLOG_LEVEL_CRITICAL
 ************************************************************************/
+#ifndef __LOG_SPD_H__
+#define __LOG_SPD_H__
+
 #include "log_base.h"
 #define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE
 #include "spdlog/spdlog.h"
@@ -31,3 +34,5 @@
 #define LOG_ERROR SPDLOG_ERROR
 // #define LOG_CRITICAL SPDLOG_CRITICAL
 #define LOG_CRITICAL(...) do { SPDLOG_CRITICAL(__VA_ARGS__); abort(); } while (0)
+
+#endif
