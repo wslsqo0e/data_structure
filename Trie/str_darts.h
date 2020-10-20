@@ -196,7 +196,7 @@ public:
     ifs.read(magic, 4);
     magic[4] = '\0';
     if (strncmp(magic, DARTS_MAGIC.c_str(), 4) != 0) {
-      spdlog::warn("invalid dart file format");
+      LOG_WARN("invalid dart file format");
       return -1;
     }
 

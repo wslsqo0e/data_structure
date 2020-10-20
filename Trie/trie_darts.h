@@ -7,7 +7,6 @@
 
 #pragma once
 #include "darts.h"
-#include "Logger/log_spd.h"
 
 namespace DARTS {
 
