@@ -109,6 +109,34 @@ public:
     }
   }
 
+  // 返回 tokens[start:end] 组成词的所有前缀内容
+  size_t allPrefixSearch(std::vector<std::string>& tokens,
+                         std::vector<std::string>& res,
+                         size_t start = 0) {
+    res.clear();
+    if (start >= tokens.size()) {
+      return 0;
+    }
+
+    std::string whole_tokens;
+    for (size_t i = start; i < tokens.size(); i++) {
+      whole_tokens += tokens[i];
+    }
+
+    int start_size = 30;
+    int *p_res = new int[start_size];
+    int result_size = 0;
+    while (start_size <= (result_size = commonPrefixSearch(whole_tokens, p_res, start_size))) {
+      start_size *= 2;
+      p_res = (int*)realloc(p_res, start_size);
+    }
+    for (int i = 0; i < result_size; i++) {
+      res.push_back(_word_array[p_res[i]]);
+    }
+
+    return res.size();
+  }
+
   // token 匹配，返回匹配最末的索引，指代tokens[start:end]在字典树中存在并成词， 不包括返回的end
   size_t match_token(std::vector<std::string>& tokens, size_t start = 0) {
     if (start >= tokens.size()) {
