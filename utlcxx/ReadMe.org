@@ -1,0 +1,307 @@
+* utilcxx库
+  参考自 https://github.com/mvorbrodt/blog/blob/master/src
+  感觉该作者的实现充分利用了C++的特性，值得学习
+** semaphore
+*** semaphore
+    信号量， 参考 =semaphore.h=
+    不过C++中有标准实现的信号量了,  ~std::counting_semaphore~, ~std::binary_semaphore~
+
+    + ~semaphore::post~
+      释放一个信号量， ~notify_one~
+    + ~semahpore::post(unsigned int count)~
+      释放多个信号量, ~notify_all~
+    + ~semaphore::wait~
+      尝试占用一个信号量
+          如果占用不到，则等待
+          占用成功后继续执行
+
+    感觉每个thread调用完 ~semaphore::wait~ 方法之后，得手动post下，才能保持信号量的总数不变
+
+    信号量应该在初始化时决定好 ~m_count~ 的值，
+    这意味着同时最多可以由多少个线程处于执行状态
+
+    线程执行时，应该先调用信号量的wait方法，待执行完毕后再调用post方法
+*** fast_semaphore
+    封装了下 ~semaphore~, 额外维护一个 ~m_count~ 变量，
+    可用于判断当前是否有thread 处于 block 状态
+    当前信号量是否够用，然后才调用 ~post~ 和 ~wait~ 方法
+    理论上能达到更高的效率
+** queue
+*** blocking_queue
+    不限容量的 block queue
+
+    成员数据如下
+    #+begin_src c++
+      std::queue<T> m_queue;
+      mutable std::mutex m_mutex;
+      std::condition_variable m_ready;
+      bool m_done = false;
+    #+end_src
+    所有对 ~m_queue~ 的操作都需要加锁
+
+    ~push~ 时不会阻塞，每push一个item，都会调用 ~notify_one~, 试图 resume 一个因为pop
+    阻塞的线程
+
+    ~pop~ 如果队列会空会阻塞，获取一个item
+
+    ~done~ 一个方法，试图终止现在以及未来所有 ~pop~ 出现的阻塞
+    此时可以认为当前 blocking queue 将不再使用了
+*** fixed_blocking_queue
+    固定queue size的 block queue
+
+    成员数据如下
+    #+begin_src c++
+      const unsigned int m_size;
+      std::atomic_uint m_pushIndex;
+      std::atomic_uint m_popIndex;
+      std::atomic_uint m_count;    // 队列中待处理 item 数量
+      T* m_data;    // 构建动态数组，大小为m_size，用于存储 item 数据，fifo队列
+
+      semaphore m_openSlots;
+      semaphore m_fullSlots;
+      mutable std::mutex m_cs;
+    #+end_src
+
+    这里使用两个信号令来进行生产者和消费者的协同
+    ~m_openSlots~ 信号量初始化count为 m_size
+    ~m_fullSlots~ 信号量初始化count为 0
+*** atomic_blocking_queue
+    同 ~fixed_blocking_queue~ 大致一致
+
+    只不过每次 push 或者 pop 的时候会进行如下操作，后续研究下
+    #+begin_src c++
+      auto expected = m_pushIndex.load();
+      while(!m_pushIndex.compare_exchange_weak(expected, m_pushIndex % m_size))
+        expected = m_pushIndex.load();
+    #+end_src
+** pool
+*** simple_thread_pool
+    数据成员如下
+    #+begin_src c++
+      using Proc = std::function<void(void)>;    // 函数类型， 参数和返回值都是void
+      using Queue = blocking_queue<Proc>;        // blocking_queue 中防止待执行的函数指针
+      Queue m_queue;
+
+      using Threads = std::vector<std::thread>;
+      Threads m_threads;                         // 构造函数需要传入 thread_num, 然后提前构建thread队列
+    #+end_src
+
+    这里采用不限容量的 blocking queue
+
+    + ~enqueue_work~
+      传入没有返回值的待执行函数
+    + ~enqueue_task~
+      传入有返回值得待执行函数
+      这个函数写法非常新颖，可以多看看
+*** thread_pool
+    数据成员如下
+    #+begin_src c++
+      using Proc = std::function<void(void)>;
+      using Queue = blocking_queue<Proc>;
+      using Queues = std::vector<Queue>;
+      Queues m_queues;   // 多个 block queues 的队列
+
+      using Threads = std::vector<std::thread>;
+      Threads m_threads;
+
+      const unsigned int m_count;
+      std::atomic_uint m_index = 0;
+
+      inline static const unsigned int K = 2;
+    #+end_src
+
+    这里同样采用不限容量的 blocking queue
+    只不过使用了多个 blocking queue
+
+    构造时 ~m_queues~ 和 ~m_threads~ 数量一致
+
+    ~enqueue_work~ 函数会尝试均布的将任务分配给队列，
+    由于是不限容量block queue, 仅当两个线程同时将任务分配给一个block queue时，会产生 enqueue 失败
+    此时顺序找下一个队列
+
+    每个thread优先尝试从特定队列取待执行函数，如果取失败(加锁或者队列为空)，会尝试从下一个队列中取待执行函数
+
+    由于有多个队列来缓存待执行函数，线程在取执行函数的时候产生冲突的可能性更小，所以会比 ~simple_thread_pool~ 更快
+
+    如果每个执行函数的执行时间越短，这这种优势更明显。
+*** pool 测试
+
+* 知识点 Tips
+** explicit 关键字作用和用法
+   Converting Constructer概念
+   在构造函数在 Copy initialization 时，会进行隐式的类型转换
+   #+begin_src c++
+     struct A
+     {
+       A() { }         // converting constructor (since C++11)
+       A(int) { }      // converting constructor
+       A(int, int) { } // converting constructor (since C++11)
+     };
+
+     A a1 = 1;  // copy-initialization selects A::A(int)  添加 explicit 会报错
+     A a2 = (A)1;   // explicit cast performs static_cast, direct-initialization
+     A a3 = {3, 4}; // copy-list-initialization selects A::A(int, int) 添加 explicit 会报错
+     A a4({3, 4});  // direct-list-initialization selects A::A(int, int)
+   #+end_src
+
+   构造函数添加 ~explicit~ 会防止 Copy initialization时进行隐式的类型转换。只有未指定的构造函数才是 Converting Constructer
+** 匿名函数
+   anonymous function 也叫 *lambda expression*
+
+   C++中匿名函数具有如下形式
+   ~[capture](parameters) -> return_type { function_body }~
+
+   举例如下
+   #+begin_src c++
+     [](int x, int y) -> int { return x + y; }
+   #+end_src
+
+   最开头的中括号是用于定义闭包的范围，也可以为匿名函数如何捕获(capture)外部变量 (同匿名函数形参无任何关系)
+   具体用法如下
+   + ~[]~ : no variables defined. Attempting to use any external variables in the lambda is an error.
+   + ~[x, &y]~ : x is captured by value, y is captured by reference
+   + ~[&]~ : any external variable is implicitly captured by reference if used
+   + ~[=]~ : any external variable is implicitly captured by value if used
+   + ~[&, x]~ : x is explicitly captured by value. Other variables will be captured by reference
+   + ~[=, &z]~ : z is explicitly captured by reference. Other variables will be captured by value
+
+   一个使用示例如下
+   #+begin_src c++
+     std::vector<int> some_list{ 1, 2, 3, 4, 5 };
+     int total = 0;
+     std::for_each(begin(some_list), end(some_list),
+                   [&total](int x) {	total += x; });
+   #+end_src
+
+
+** 特殊类型
+*** std::atomic_int
+    线程安全的 int 类型
+    实际是 ~std::atomic<int>~
+
+    头文件 =#include <atomic>=
+*** std::mutex
+    线程锁, 互斥量
+
+    官方描述如下
+    A mutex is *lockable object* that is designed to signal when critical sections of code need exclusive access,
+    preventing other threads with the same protection from executing concurrently and access the same memory locations.
+
+    使用方式如下
+    #+begin_src c++
+      std::mutex mtx;           // mutex for critical section
+
+      void print_block (int n, char c) {
+        // critical section (exclusive access to std::cout signaled by locking mtx):
+        mtx.lock();
+        for (int i=0; i<n; ++i) { std::cout << c; }
+        std::cout << '\n';
+        mtx.unlock();
+      }
+    #+end_src
+
+    头文件 =#include <mutex>=
+*** std::condition_variable
+    条件变量
+
+    官方描述如下
+    The *condition_variable* class is a synchronization primitive that can be used to block a thread,
+    or multiple threads at the same time, until another thread both modifies *a shared variable (the condition)*,
+    and notifies the *condition_variable*.
+    两个动作， modifies a shared variable 和 notifies the *condition_variable*
+
+    The thread that intends to modify the variable has to:
+    1. acquire a ~std::mutex~ (tipically via ~std::lock_guard~)
+    2. perform the modification while the lock is held
+    3. execute ~notify_one~ or ~notify_all~ on the ~std::condition_variable~ (the lock does not need to be held for notification)
+
+    Any thread that intends to wait on ~std::condition_variable~ has to
+    1. acquire a ~std::unique_lock<std::mutex>~, on the same mutex as used to protected the shared variable
+    2. either
+       1. check the condition, in case it was already updated and notified
+       2. execute ~wait~, ~wait_for~ or ~wait_untill~. The wait operation atomically release the mutex
+          and suspend the execution of the thread.
+       3. When the condition variable is notified, a timeout expires, or a spurious wakeup occurs, the thread
+          is awakened, and the mutex is atomically reacquired. The thread should then check the conditon and
+          resume waiting if the wake up was spurious.  (spurious 虚假的)
+       or
+       1. use the predicated overload of ~wait~, ~wait_for~, and ~wait_until~, which takes care of the three steps above.
+
+
+    + ~wait(std::unique_lock<std::mutex>& lock)~
+      释放掉当前lock, block当前线程.
+      The thread will be unblocked when ~notify_all()~ or ~notify_one()~ is executed.
+    + ~wait(std::unique_lock<std::mutex>& lock, Predicted pred)~
+      完整的函数声明如下
+      #+begin_src c++
+        template< class Predicate >
+        void wait( std::unique_lock<std::mutex>& lock, Predicate pred );
+
+        // equal to
+        while (!pred()) {
+          wait(lock);
+        }
+      #+end_src
+      ~Predicate~ 类型不同太深究，第二个参数通常使用匿名函数
+    + ~wait_for~
+      对比 ~wait~ 方法，多了一个等待时间
+      类型为 ~const std::chrono::duration<Rep, Period>& rel_time~
+      也有两个函数声明，其中一个为 Predicate 版本
+    + ~wait_until~
+      对比 ~wait~ 方法，多了一个 until 时间点
+      类型为 ~std::chrono::time_point<Clock, Duration>& timeout_time~
+
+    使用示例
+    #+begin_src c++
+      std::mutex cv_m; // This mutex is used for three purposes:
+                       // 1) to synchronize accesses to i
+                       // 2) to synchronize accesses to std::cerr
+                       // 3) for the condition variable cv
+      int i = 0;
+
+      void waits()
+      {
+        std::unique_lock<std::mutex> lk(cv_m);
+        std::cerr << "Waiting... \n";
+        cv.wait(lk, []{return i == 1;});   // 仅当 i==1 满足时，notify方法才有可能resume thread
+        std::cerr << "...finished waiting. i == 1\n";
+      }
+    #+end_src
+    ~notify_all~  unblock所有线程
+    ~notify_one~  unblock one thread, 随机选择的吧
+*** unique_lock 和 scoped_lock
+    两者都能实现lock的功能
+
+    ~scoped_lock~ 功能更纯粹，简单
+    ~unique_lock~ 还有很多附加功能，比如
+    + Deferred locking
+    + Timeout locking
+    + Adoption of mutexe
+    + Transfer of ownership
+*** noexcept 关键字
+    Specifies whether a function could throw exceptions.
+
+    不太知道具体的目的是啥，大致意思就是禁止函数抛出
+*** std::function
+    暂时未查资料，但猜测是函数签名，用于创建函数指针
+
+    ~std::function<void(void)>~ 指代函数参数是 void, 返回值是 void 的函数类型
+*** Discard-value expression
+    A *discard-value expression* is an expression that is used for its side-effects only.
+    忽略返回值的表达式
+*** nodiscard
+    当一个函数被 ~[[nodiscard]]~ 修饰时，表明该函数返回值不建议忽略，以忽略返回值方式调用该函数时，编译器
+    会给出warning
+    #+begin_src c++
+      struct [[nodiscard]] error_info { };
+      error_info enable_missile_safety_mode();  // 调用 enable_missile_safety_mode 时，需要有变量接收返回值
+      void launch_missiles();
+      void test_missiles() {
+        enable_missile_safety_mode(); // compiler may warn on discarding a nodiscard value
+        launch_missiles();
+      }
+      error_info& foo();  // 引用无影响
+      void f1() {
+        foo(); // nodiscard type is not returned by value, no warning
+      }
+    #+end_src
