@@ -14,10 +14,10 @@
 
 namespace utilcxx {
 
-class semaphore
+class Semaphore
 {
 public:
-  explicit semaphore(unsigned int count = 0)
+  explicit Semaphore(unsigned int count = 0)
     : m_count(count)
   {}
 
@@ -72,10 +72,10 @@ private:
   std::condition_variable m_cv;
 };
 
-class fast_semaphore
+class FastSemaphore
 {
 public:
-  explicit fast_semaphore(unsigned int count = 0)
+  explicit FastSemaphore(unsigned int count = 0)
     : m_count(count), m_semaphore(0) {}
 
   void post()
@@ -94,7 +94,7 @@ public:
 
 private:
   std::atomic_int m_count;
-  semaphore m_semaphore;
+  Semaphore m_semaphore;
 };
 
 }

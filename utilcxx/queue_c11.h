@@ -23,7 +23,7 @@
 namespace utilcxx {
 
 template <typename T>
-class blocking_queue {
+class BlockingQueue {
 public:
   template <typename Q = T>
   typename std::enable_if<std::is_copy_constructible<Q>::value, void>::type
@@ -160,10 +160,10 @@ private:
 };
 
 template<typename T>
-class fixed_blocking_queue
+class FixedBlockingQueue
 {
 public:
-  explicit fixed_blocking_queue(unsigned int size)
+  explicit FixedBlockingQueue(unsigned int size)
     : m_size(size), m_pushIndex(0), m_popIndex(0), m_count(0),
       m_data((T*)operator new(size * sizeof(T))),
       m_openSlots(size), m_fullSlots(0)
@@ -172,7 +172,7 @@ public:
       throw std::invalid_argument("Invalid queue size!");
   }
 
-  ~fixed_blocking_queue() noexcept
+  ~FixedBlockingQueue() noexcept
   {
     while (m_count--) {
       m_data[m_popIndex].~T();
@@ -562,16 +562,16 @@ private:
   std::atomic_uint m_count;
   T* m_data;
 
-  semaphore m_openSlots;
-  semaphore m_fullSlots;
+  Semaphore m_openSlots;
+  Semaphore m_fullSlots;
   mutable std::mutex m_cs;
 };
 
 template<typename T>
-class atomic_blocking_queue
+class AtomicBlockingQueue
 {
 public:
-  explicit atomic_blocking_queue(unsigned int size)
+  explicit AtomicBlockingQueue(unsigned int size)
   : m_size(size), m_pushIndex(0), m_popIndex(0), m_count(0),
   m_data((T*)operator new(size * sizeof(T))),
   m_openSlots(size), m_fullSlots(0)
@@ -580,7 +580,7 @@ public:
       throw std::invalid_argument("Invalid queue size!");
   }
 
-  ~atomic_blocking_queue() noexcept
+  ~AtomicBlockingQueue() noexcept
   {
     while (m_count--)
     {
@@ -777,8 +777,8 @@ private:
   std::atomic_uint m_count;
   T* m_data;
 
-  semaphore m_openSlots;
-  semaphore m_fullSlots;
+  Semaphore m_openSlots;
+  Semaphore m_fullSlots;
 };
 
 }

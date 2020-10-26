@@ -12,13 +12,13 @@
 
 namespace utilcxx {
 
-class time_cost {
+class TimeCost {
 public:
-  time_cost(std::string message = "", bool is_auto = true) : message_(message), is_auto_(is_auto) {
+  TimeCost(std::string message = "", bool is_auto = true) : message_(message), is_auto_(is_auto) {
     start_time = std::chrono::high_resolution_clock::now();
   }
 
-  ~time_cost() {
+  ~TimeCost() {
     if (is_auto_) {
       duration();
       }
@@ -26,6 +26,13 @@ public:
 
   void reset() {
     start_time = std::chrono::high_resolution_clock::now();
+  }
+
+  // 返回毫秒值
+  unsigned int get_reset() {
+    auto end_time = std::chrono::high_resolution_clock::now();
+    start_time = std::chrono::high_resolution_clock::now();
+    return std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
   }
 
   void duration() {
