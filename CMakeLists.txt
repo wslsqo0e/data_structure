@@ -1,7 +1,6 @@
 cmake_minimum_required (VERSION 3.1)
 project (data_structure)
 
-
 # define macro
 macro(add_test_executable)
   cmake_parse_arguments(test_exe "" "NAME" "SOURCES;DEPENDS" ${ARGN})
@@ -11,6 +10,8 @@ macro(add_test_executable)
     NAME ${test_exe_NAME}
     COMMAND ${test_exe_NAME}
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
+  set_target_properties(${test_exe_NAME}  PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/testbin)
   install(TARGETS ${test_exe_NAME} RUNTIME DESTINATION testbin)
 
   unset(test_exe_NAME)
@@ -38,3 +39,6 @@ enable_testing()
 add_subdirectory(Logger)
 include_directories(${LOGGER_INCLUDE_PATH})
 add_subdirectory(Trie)
+
+# for output
+set(DATA_STRUCTURE_INCLUDE_PATH "${LOGGER_INCLUDE_PATH};${CMAKE_CURRENT_SOURCE_DIR}" PARENT_SCOPE)
