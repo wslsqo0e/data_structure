@@ -4,7 +4,7 @@
 #include<pthread.h>
 
 template<typename T>
-class Singletion {
+class Singleton {
 public:
   static  T * instance() {
     if(obj_instance == NULL) {
@@ -19,7 +19,7 @@ public:
     return obj_instance;
   }
 
-private:
+protected:
   Singleton () {}
   virtual ~Singleton() {}
 

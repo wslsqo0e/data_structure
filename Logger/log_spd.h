@@ -18,6 +18,7 @@
 #include "log_base.h"
 #define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE
 #include "spdlog/spdlog.h"
+#include "spdlog/sinks/basic_file_sink.h"
 
 #define level_trace spdlog::level::trace
 #define level_debug spdlog::level::debug
@@ -25,7 +26,11 @@
 #define level_warn spdlog::level::warn
 #define level_error spdlog::level::error
 
-#define LOG_SET_LEVEL(n) do {spdlog::set_level(n);} while (0)
+#define LOG_SET_LEVEL(n) do {spdlog::set_level(n);} while (0);
+#define LOG_SET_FILE(filename) do {  \
+  auto logger = spdlog::basic_logger_mt("basic_logger", filename); \
+  spdlog::set_default_logger(logger); \
+} while (0);
 
 #define LOG_TRACE SPDLOG_TRACE
 #define LOG_DEBUG SPDLOG_DEBUG
