@@ -9,6 +9,7 @@
 #define __UTILCXX_POOL_C11_H__
 
 #include <future>
+#include "base_utils.h"
 #include "queue_c11.h"
 
 namespace utilcxx {
@@ -127,7 +128,8 @@ private:
   const unsigned int m_count;
   std::atomic_uint m_index;
 
-  inline static const unsigned int K = 2;
+  // inline static const unsigned int K = 2;
+  static const unsigned int K = 2;
 };
 
 }
