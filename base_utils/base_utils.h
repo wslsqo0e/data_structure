@@ -11,6 +11,8 @@
 
 #include <vector>
 #include <iostream>
+#include <string>
+#include <sstream>
 
 template<typename T>
 inline void print_vec(std::vector<T> vv) {
@@ -30,6 +32,15 @@ void delete_ptr_vec(std::vector<T> vec)
   std::vector<T> tmp;
   tmp.swap(vec);
 };
+
+inline std::string get_cur_thread_id() {
+  std::ostringstream oss;
+  oss << std::this_thread::get_id();
+  std::string stid = oss.str();
+  // uint64_t tid = std::stoull(stid);
+  // return tid;
+  return stid;
+}
 
 // Makes copy constructor and operator= private.
 #define DISALLOW_COPY_AND_ASSIGN(type)          \

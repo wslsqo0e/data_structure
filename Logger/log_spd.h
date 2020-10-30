@@ -24,7 +24,7 @@
 #define level_debug spdlog::level::debug
 #define level_info spdlog::level::info
 #define level_warn spdlog::level::warn
-#define level_error spdlog::level::error
+// #define level_error spdlog::level::error
 
 #define LOG_SET_LEVEL(n) do {spdlog::set_level(n);} while (0);
 #define LOG_SET_FILE(filename) do {  \
