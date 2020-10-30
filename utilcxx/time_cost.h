@@ -14,7 +14,7 @@ namespace utilcxx {
 
 class TimeCost {
 public:
-  TimeCost(std::string message = "", bool is_auto = true) : message_(message), is_auto_(is_auto) {
+  TimeCost(std::string message = "", bool is_auto = false) : message_(message), is_auto_(is_auto) {
     start_time = std::chrono::high_resolution_clock::now();
   }
 
