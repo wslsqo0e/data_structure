@@ -13,6 +13,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include "unicode_string.h"
 
 template<typename T>
 inline void print_vec(std::vector<T> vv) {
@@ -65,6 +66,11 @@ static inline void trim(std::string &s) {
   ltrim(s);
   rtrim(s);
 }
+
+// 半角转全角
+std::string Q2B(const std::string &input);
+// 全角转半角
+std::string B2Q(const std::string &input);
 
 
 std::string remove_comment(const std::string &input_str);
