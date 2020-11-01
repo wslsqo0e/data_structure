@@ -39,6 +39,13 @@ enable_testing()
 add_subdirectory(Logger)
 include_directories(${LOGGER_INCLUDE_PATH})
 add_subdirectory(Trie)
+add_subdirectory(UnicodeString)
+include_directories(${UNICODE_STRING_INCLUDE_PATH})
+add_subdirectory(base_utils)
+
+add_library(data_structure ${LOGGER_LIB_PATH}
+  ${BASE_UTILS_LIB_PATH}
+  ${UNICODE_STRING_LIB_PATH})
 
 # for output
-set(DATA_STRUCTURE_INCLUDE_PATH "${LOGGER_INCLUDE_PATH};${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_SOURCE_DIR}/base_utils;${CMAKE_CURRENT_SOURCE_DIR}/utilcxx" PARENT_SCOPE)
+set(DATA_STRUCTURE_INCLUDE_PATH "${LOGGER_INCLUDE_PATH};${CMAKE_CURRENT_SOURCE_DIR};${BASE_UTILS_INCLUDE_PATH};${UNICODE_STRING_INCLUDE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/utilcxx" PARENT_SCOPE)

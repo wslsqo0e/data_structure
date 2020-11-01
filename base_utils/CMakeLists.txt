@@ -1,0 +1,3 @@
+set(BASE_UTILS_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/ PARENT_SCOPE)
+set(BASE_UTILS_LIB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/base_utils.cpp" PARENT_SCOPE)
+add_library(base_utils base_utils.cpp)

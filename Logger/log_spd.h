@@ -14,11 +14,13 @@
 ************************************************************************/
 #ifndef __LOG_SPD_H__
 #define __LOG_SPD_H__
+#include <sstream>
 
 #include "log_base.h"
 #define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/basic_file_sink.h"
+#include "spdlog//sinks/stdout_color_sinks.h"
 
 #define level_trace spdlog::level::trace
 #define level_debug spdlog::level::debug
@@ -27,10 +29,18 @@
 // #define level_error spdlog::level::error
 
 #define LOG_SET_LEVEL(n) do {spdlog::set_level(n);} while (0);
-#define LOG_SET_FILE(filename) do {  \
-  auto logger = spdlog::basic_logger_mt("basic_logger", filename); \
-  spdlog::set_default_logger(logger); \
-} while (0);
+#define LOG_SET_FILE(filename) do {                                     \
+    int r = rand();                                                     \
+    std::stringstream ss;                                               \
+    ss << r;                                                            \
+    auto logger = spdlog::basic_logger_mt(ss.str().c_str(), filename);  \
+    spdlog::set_default_logger(logger);                                 \
+  } while (0);
+
+#define LOG_TO_STDERR do {                                              \
+    auto err_logger = spdlog::stderr_color_mt("stderr", spdlog::color_mode::automatic); \
+    spdlog::set_default_logger(err_logger);                             \
+  } while (0);
 
 #define LOG_TRACE SPDLOG_TRACE
 #define LOG_DEBUG SPDLOG_DEBUG

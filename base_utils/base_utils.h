@@ -42,6 +42,33 @@ inline std::string get_cur_thread_id() {
   return stid;
 }
 
+inline std::string path_join(const std::string &data_path, const std::string &file_name) {
+  return data_path + "/" + file_name;
+}
+
+// trim from start (in place)
+static inline void ltrim(std::string &s) {
+  s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
+                                                        return !std::isspace(ch);
+                                                      }));
+}
+
+// trim from end (in place)
+static inline void rtrim(std::string &s) {
+  s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
+                                               return !std::isspace(ch);
+                                             }).base(), s.end());
+}
+
+// trim from both ends (in place)
+static inline void trim(std::string &s) {
+  ltrim(s);
+  rtrim(s);
+}
+
+
+std::string remove_comment(const std::string &input_str);
+
 // Makes copy constructor and operator= private.
 #define DISALLOW_COPY_AND_ASSIGN(type)          \
   type(const type&);                            \
