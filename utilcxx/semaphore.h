@@ -81,19 +81,22 @@ public:
   void post()
   {
     int count = m_count.fetch_add(1, std::memory_order_release); // 返回 m_count 原来的值
-    if (count < 0)
+    if (count < 0)        // 有 -count 个线程处于wait 状态
       m_semaphore.post();
   }
 
   void wait()
   {
     int count = m_count.fetch_sub(1, std::memory_order_acquire);
-    if (count < 1)
+    if (count < 1)             // 有 count 个空闲槽位可用于运行线程
       m_semaphore.wait();
   }
 
 private:
   std::atomic_int m_count;
+  // m_count = 0: 无线程block，无新线程可运行
+  // m_count > 0: 无线程block，有m_count个新线程可运行
+  // m_count < 0: -m_count 个线程block, 无新线程可运行
   Semaphore m_semaphore;
 };
 

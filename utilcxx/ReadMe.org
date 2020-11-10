@@ -6,10 +6,18 @@
     信号量， 参考 =semaphore.h=
     不过C++中有标准实现的信号量了,  ~std::counting_semaphore~, ~std::binary_semaphore~
 
+    数据成员如下
+    #+begin_src c++
+      std::atomic_int m_count;    // 信号量计数
+      std::mutex m_mutex;
+      std::condition_variable m_cv;
+    #+end_src
+
     + ~semaphore::post~
       释放一个信号量， ~notify_one~
     + ~semahpore::post(unsigned int count)~
-      释放多个信号量, ~notify_all~
+      释放count信号量, 调用 ~notify_all~
+      但通过 ~m_count~ 计数，确保最多count个线程恢复执行
     + ~semaphore::wait~
       尝试占用一个信号量
           如果占用不到，则等待
@@ -20,7 +28,7 @@
     信号量应该在初始化时决定好 ~m_count~ 的值，
     这意味着同时最多可以由多少个线程处于执行状态
 
-    线程执行时，应该先调用信号量的wait方法，待执行完毕后再调用post方法
+    线程执行时，应该先调用信号量的wait方法，待执行完毕后再调用post方法 (前提是m_count != 0)
 *** fast_semaphore
     封装了下 ~semaphore~, 额外维护一个 ~m_count~ 变量，
     可用于判断当前是否有thread 处于 block 状态
