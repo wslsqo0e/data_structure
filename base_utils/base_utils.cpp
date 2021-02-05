@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "base_utils.h"
 #include "unicode_string.h"
 
