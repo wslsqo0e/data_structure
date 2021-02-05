@@ -74,6 +74,8 @@ std::string B2Q(const std::string &input);
 
 std::string remove_comment(const std::string &input_str);
 
+std::vector<std::string> string_split(std::string str, std::string delimiter);
+
 // Makes copy constructor and operator= private.
 #define DISALLOW_COPY_AND_ASSIGN(type)          \
   type(const type&);                            \
