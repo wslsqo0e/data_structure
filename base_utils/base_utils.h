@@ -12,6 +12,7 @@
 #include <string>
 #include <sstream>
 #include <thread>
+#include <algorithm>
 #include "unicode_string.h"
 
 template<typename T>
