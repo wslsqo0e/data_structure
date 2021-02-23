@@ -22,6 +22,9 @@ public:
   bool is_null() const;
   bool is_null();
 
+  bool is_space() const; // 判断是否时 space \n \r \t
+  bool is_half_width() const; // 判断是否是半角字符
+
   bool operator == (const UnicodeChar& other) const;
   bool operator != (const UnicodeChar& other) const;
   bool operator < (const UnicodeChar& other) const;

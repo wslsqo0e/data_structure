@@ -287,6 +287,20 @@ bool UnicodeChar::is_null() {
   return true;
 }
 
+bool UnicodeChar::is_space() const {
+  if ((*this) == ' ' || (*this) == '\t' || (*this) == '\n' || (*this) == '\r') {
+    return true;
+  }
+  return false;
+}
+
+bool UnicodeChar::is_half_width() const {
+  if (this->get_code() >=32 && this->get_code() <= 126) {
+    return true;
+  }
+  return false;
+}
+
 bool UnicodeChar::operator == (const UnicodeChar& other) const {
   if (strcmp(_cc, other._cc) == 0) {
     return true;
