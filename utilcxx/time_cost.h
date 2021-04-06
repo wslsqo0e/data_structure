@@ -33,7 +33,7 @@ public:
     auto end_time = std::chrono::high_resolution_clock::now();
     auto ret_time = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
     start_time = std::chrono::high_resolution_clock::now();
-    return ret_time
+    return ret_time;
   }
 
   void duration() {
