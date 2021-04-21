@@ -67,6 +67,22 @@ static inline void trim(std::string &s) {
   rtrim(s);
 }
 
+// string join
+template<typename T>
+static inline std::string str_join(T begin, T end, std::string sep) {
+  std::ostringstream ss;
+  if (begin != end) {
+    ss << *begin++;
+  }
+
+  while (begin != end) {
+    ss << sep;
+    ss << *begin++;
+  }
+  return ss.str();
+}
+
+
 // 半角转全角
 std::string Q2B(const std::string &input);
 // 全角转半角
