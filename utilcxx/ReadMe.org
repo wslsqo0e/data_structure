@@ -181,7 +181,6 @@
                    [&total](int x) {	total += x; });
    #+end_src
 
-
 ** 特殊类型
 *** std::atomic_int
     线程安全的 int 类型

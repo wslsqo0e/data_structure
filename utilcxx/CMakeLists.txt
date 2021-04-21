@@ -14,7 +14,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -g")
 aux_source_directory(${PROJECT_SOURCE_DIR} DIRSRCS)
 link_libraries(-liconv)
 
-add_executable(main_test ${DIRSRCS})
+#add_executable(main_test ${DIRSRCS})
+add_test_executable(NAME time_cost-test SOURCES time_cost-test.cc)
+target_include_directories(base_utils-test PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>)
 
 #set(NGRAM_SRCS ${DIRSRCS})
 #list(APPEND NGRAM_SRCS ${PROJECT_SOURCE_DIR}/bin_src/ngram.cpp)

@@ -42,6 +42,7 @@ add_subdirectory(Trie)
 add_subdirectory(UnicodeString)
 include_directories(${UNICODE_STRING_INCLUDE_PATH})
 add_subdirectory(base_utils)
+add_subdirectory(utilcxx)
 
 add_library(data_structure ${LOGGER_LIB_PATH}
   ${BASE_UTILS_LIB_PATH}
