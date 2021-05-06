@@ -28,7 +28,7 @@ public:
     start_time = std::chrono::high_resolution_clock::now();
   }
 
-  // 返回毫秒值
+  // 返回微秒值
   unsigned int get_reset() {
     auto end_time = std::chrono::high_resolution_clock::now();
     auto ret_time = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
