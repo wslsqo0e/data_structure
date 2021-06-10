@@ -12,7 +12,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -g")
 #include_directories(../../basic/spdlog/include/ ../../basic/inih/ ../../basic/json/include/ ../../basic/darts/ ../../basic/common)
 
 aux_source_directory(${PROJECT_SOURCE_DIR} DIRSRCS)
+if (APPLE)
 link_libraries(-liconv)
+endif ()
 
 #add_executable(main_test ${DIRSRCS})
 add_test_executable(NAME time_cost-test SOURCES time_cost-test.cc)
